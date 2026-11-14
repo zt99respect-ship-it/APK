@@ -1,0 +1,28 @@
+{
+  "name": "RESPECT - مجتمع ريسبكت",
+  "short_name": "RESPECT",
+  "description": "مجتمع ريسبكت للبثوث والتفاعل",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#09090B",
+  "theme_color": "#09090B",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/Picsart_26-11-14_11-07-40-109.jpg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any"
+    },
+    {
+      "src": "/Picsart_26-11-14_11-07-40-109.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    }
+  ]
+}

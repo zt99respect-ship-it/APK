@@ -1,0 +1,118 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function verified() {
+      return signedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return verified() && request.auth.token.email == 'zt.99.respect@gmail.com';
+    }
+
+    function profilePath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function hasProfile() {
+      return exists(profilePath());
+    }
+
+    function me() {
+      return get(profilePath()).data;
+    }
+
+    function isStaff() {
+      return isAdmin() || (verified() && hasProfile() && me().role == 'moderator');
+    }
+
+    function activeMember() {
+      return isAdmin() || (verified() && hasProfile() && me().banned != true);
+    }
+
+    function canPost() {
+      return isAdmin() || (verified() && hasProfile() && me().banned != true && me().muted != true);
+    }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+
+      allow create: if verified()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['username', 'usernameLower', 'avatarUrl', 'bannerUrl', 'bio', 'kickUsername', 'role', 'banned', 'muted', 'createdAt'])
+        && request.resource.data.banned == false
+        && request.resource.data.muted == false
+        && ((request.auth.token.email == 'zt.99.respect@gmail.com' && request.resource.data.role == 'admin')
+          || (request.auth.token.email != 'zt.99.respect@gmail.com' && request.resource.data.role == 'user'))
+        && request.resource.data.username is string
+        && request.resource.data.username.size() >= 3
+        && request.resource.data.username.size() <= 20;
+
+      allow update: if isAdmin()
+        || (verified()
+          && request.auth.uid == uid
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'banned', 'muted', 'username', 'usernameLower', 'createdAt']));
+
+      allow delete: if false;
+
+      match /subscriptions/{slug} {
+        allow read, write: if verified() && request.auth.uid == uid;
+      }
+
+      match /privateStreamers/{slug} {
+        allow read, write: if verified() && request.auth.uid == uid;
+      }
+    }
+
+    match /streamers/{slug} {
+      allow read: if verified();
+      allow write: if isAdmin();
+    }
+
+    match /posts/{postId} {
+      allow read: if verified();
+
+      allow create: if canPost()
+        && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.authorRole == me().role
+        && request.resource.data.keys().hasOnly(['text', 'imageUrl', 'authorId', 'authorName', 'authorAvatar', 'authorRole', 'likedBy', 'likesCount', 'commentsCount', 'pinned', 'createdAt'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.pinned == false
+        && request.resource.data.likesCount == 0
+        && request.resource.data.commentsCount == 0
+        && request.resource.data.likedBy.size() == 0;
+
+      allow update: if (isStaff() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinned']))
+        || (activeMember() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likedBy', 'likesCount']))
+        || (canPost() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentsCount']));
+
+      allow delete: if isStaff() || (verified() && resource.data.authorId == request.auth.uid);
+
+      match /comments/{commentId} {
+        allow read: if verified();
+        allow create: if canPost()
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 280;
+        allow update: if false;
+        allow delete: if isStaff() || (verified() && resource.data.authorId == request.auth.uid);
+      }
+    }
+
+    match /config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
