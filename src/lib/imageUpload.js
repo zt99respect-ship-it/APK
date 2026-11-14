@@ -1,11 +1,8 @@
 import { MAX_IMAGE_BYTES } from './constants.js';
 
-const IMGBB_KEY = import.meta.env.VITE_IMGBB_KEY;
-
-export const imageHostConfigured = Boolean(IMGBB_KEY);
+const IMGBB_KEY = 'e7da926233612aace42184d06c9f5a6d';
 
 export async function uploadImage(file) {
-  if (!IMGBB_KEY) throw new Error('الخدمة غير مهيأة بعد');
   if (!file || !file.type.startsWith('image/')) throw new Error('الملف يجب أن يكون صورة');
   if (file.size > MAX_IMAGE_BYTES) throw new Error('حجم الصورة أكبر من 10 ميغابايت');
 

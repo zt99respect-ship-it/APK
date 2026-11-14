@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { onAuthStateChanged, reload } from 'firebase/auth';
-import { auth, isFirebaseConfigured } from '../lib/firebase.js';
+import { auth } from '../lib/firebase.js';
 import { DEFAULT_CONFIG, isAdminEmail } from '../lib/constants.js';
 import { subscribeProfile, createProfile } from '../services/users.js';
 import { subscribeAppConfig } from '../services/settings.js';
@@ -16,15 +16,9 @@ export function AppProvider({ children }) {
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
-  useEffect(() => {
-    if (!isFirebaseConfigured) return undefined;
-    return onAuthStateChanged(auth, (user) => setAuthUser(user));
-  }, []);
+  useEffect(() => onAuthStateChanged(auth, (user) => setAuthUser(user)), []);
 
-  useEffect(() => {
-    if (!isFirebaseConfigured) return undefined;
-    return subscribeAppConfig(setConfig);
-  }, []);
+  useEffect(() => subscribeAppConfig(setConfig), []);
 
   const uid = authUser?.uid;
   const verified = Boolean(authUser?.emailVerified);

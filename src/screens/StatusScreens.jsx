@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { LogOut, Lock, ShieldOff, Wrench, Settings2 } from 'lucide-react';
+import { LogOut, Lock, ShieldOff, Wrench } from 'lucide-react';
 import { Button } from '../components/ui.jsx';
 import { useApp } from '../context/AppContext.jsx';
 import { signOutUser } from '../services/auth.js';
@@ -48,16 +48,6 @@ export function SplashScreen() {
         transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
       />
     </div>
-  );
-}
-
-export function SetupRequiredScreen() {
-  return (
-    <StatusCard
-      icon={Settings2}
-      title="الخدمة غير مكتملة"
-      description="إعدادات قاعدة البيانات لم تُضف بعد. يرجى إكمال إعداد Firebase للمتابعة."
-    />
   );
 }
 
