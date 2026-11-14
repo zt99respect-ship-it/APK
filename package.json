@@ -9,6 +9,7 @@
   "dependencies": {
     "firebase": "^11.10.0",
     "framer-motion": "^11.18.2",
+    "hls.js": "^1.5.7",
     "lucide-react": "^1.73.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
